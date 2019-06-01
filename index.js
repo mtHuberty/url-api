@@ -9,6 +9,11 @@ const app = express()
 const pool = new Pool()
 
 app.use(express.urlencoded({ extended: true }))
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+})
 
 app.get('/urls', (req, res) => {
     pool.query("SELECT * FROM urls;", (err, dbRes) => {
@@ -75,7 +80,6 @@ app.get('/:short_url', (req, res) => {
                         console.log(err)
                     } else {
                         console.log(updateRes.rows)
-                        // console.log(`Updated visits for ${dbRes.rows[0].long_url} to ${dbRes.rows[0].visits++}!`)
                     }
                 })
             } else {
@@ -90,5 +94,11 @@ app.use('/', (req, res) => {
 })
 
 app.listen(3535, () => {
-    console.log('Listening on port 3535...')
+    pool.query("SELECT 1 FROM urls;", (err, res) => {
+        if (err) {
+            throw Error(err)
+        } else {
+            console.log('Listening on port 3535...')
+        }
+    })
 })
